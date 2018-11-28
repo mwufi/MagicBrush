@@ -288,6 +288,12 @@ clear.onclick = function(event){
 	sendImage();
 }
 
+var noise_scale = document.getElementById('noise');
+var change_noise = document.getElementById('noise_button')
+change_noise.onclick = function(event){
+	socket.emit('update_parameters', { "noise_scale": noise_scale.value })
+	console.log("Sent noise level", noise_scale.value)
+}
 
 /*
 *

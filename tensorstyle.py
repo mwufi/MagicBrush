@@ -85,7 +85,7 @@ class TransformNet:
         _preds = np.clip(_preds[0], 0, 255).astype(np.uint8)
         return _preds
 
-    def decode(self, base64img):
+    def decode(self, base64img, noise_scale=10):
 
         # the bytes of the image ---> np array
         image_64_decode = base64.decodebytes(base64img.encode('utf-8'))
@@ -94,10 +94,15 @@ class TransformNet:
         # resize, and convert to RGB
         image = image.resize(self.img_shape[:2], Image.ANTIALIAS)
         image = image.convert('RGB')
-
+        
+        # turn it into a numpy array
         nparr = np.array(image)
         nparr = nparr[:,:,:3]
+        
+        noise = np.random.randint(0, noise_scale, size=nparr.shape)
+        nparr = np.clip(nparr + noise, 0, 255)
 
+        # run it through the network
         start = time()
         result = self.run_network(nparr)
         elapsed = time() - start

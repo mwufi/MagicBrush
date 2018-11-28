@@ -20,6 +20,7 @@ emperor_penguin = None
 emperor_penguin = loadTransformNet()
 
 points = []
+noise_scale = 10
 
 @app.route('/')
 def get_index():
@@ -58,6 +59,12 @@ def update_drawing(data):
     points.append(data)
     emit('draw', data, broadcast=True)
 
+@socketio.on('update_parameters')
+def update_params(data):
+    global noise_scale
+    noise_scale = int(data['noise_scale'])
+    print('Updating noise scale to {}'.format(noise_scale))
+
 @socketio.on('image')
 def receive_image(package):
     i, data = package['image_id'], package['image']
@@ -66,7 +73,7 @@ def receive_image(package):
 
     if emperor_penguin is not None:
         base64_picture = data.split(',')[1]
-        original, result = emperor_penguin.decode(base64_picture)
+        original, result = emperor_penguin.decode(base64_picture, noise_scale)
         print('Sending...', 'data:image/png;base64,' + result[:10])
         emit('result', 'data:image/png;base64,' + result)
         emit('original', 'data:image/png;base64,' + original)
